@@ -15,6 +15,7 @@ namespace SuperMarioWorldInXNA
         //Animations
         private Animation runAnimation;
         private Animation idleAnimation;
+        private Animation jumpAnimation;
 
         private SpriteEffects flip = SpriteEffects.None;
         private AnimationPlayer sprite;
@@ -28,10 +29,7 @@ namespace SuperMarioWorldInXNA
         private int spriteSheetWidth = 32; //Tiles
         private int spriteSheetHeight = 16; //Tiles
 
-        private int frameCountRun = 2;
-        private int frameCountIdle = 1;
         private float frameTime = 0.1f;
-        private int startPosRun = 0;
 
         private float scale = 2.0f;
 
@@ -91,8 +89,9 @@ namespace SuperMarioWorldInXNA
         {
             content = new ContentManager(serviceProvider, "Content");
 
-            runAnimation = new Animation(content.Load<Texture2D>("Sprites/Mario/mario"), frameTime, true, spriteSheetWidth, spriteSheetHeight, frameCountRun, startPosRun, scale);
-            idleAnimation = new Animation(content.Load<Texture2D>("Sprites/Mario/mario"), frameTime, true, spriteSheetWidth, spriteSheetHeight, frameCountIdle, startPosRun, scale);
+            runAnimation = new Animation(content.Load<Texture2D>("Sprites/Mario/mario"), frameTime, true, spriteSheetWidth, spriteSheetHeight, 2, 0, scale);
+            idleAnimation = new Animation(content.Load<Texture2D>("Sprites/Mario/mario"), frameTime, true, spriteSheetWidth, spriteSheetHeight, 1, 0, scale);
+            jumpAnimation = new Animation(content.Load<Texture2D>("Sprites/Mario/mario"), frameTime, true, spriteSheetWidth, spriteSheetHeight, 1, 1, scale);
 
             //jumpSound = Level.Content.Load<SoundEffect>("Sounds/PlayerJump");
         }
@@ -133,6 +132,11 @@ namespace SuperMarioWorldInXNA
             else
             {
                 sprite.PlayAnimation(idleAnimation);
+            }
+
+            if(Math.Abs(Velocity.Y) > 0.0f)
+            {
+                sprite.PlayAnimation(jumpAnimation);
             }
         }
 
