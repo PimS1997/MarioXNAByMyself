@@ -134,7 +134,7 @@ namespace SuperMarioWorldInXNA
                 sprite.PlayAnimation(idleAnimation);
             }
 
-            if(Math.Abs(Velocity.Y) > 0.0f)
+            if (Math.Abs(Velocity.Y) > 0.0f)
             {
                 sprite.PlayAnimation(jumpAnimation);
             }
@@ -150,7 +150,7 @@ namespace SuperMarioWorldInXNA
             {
                 Move(true, gameTime);
             }
-            if(keyboardState.IsKeyDown(Keys.W))
+            if (keyboardState.IsKeyDown(Keys.W))
             {
                 Jump(gameTime);
             }
