@@ -15,6 +15,12 @@ namespace SuperMarioWorldInXNA
         }
         Animation animation;
 
+        public SpriteCutter SpriteCut
+        {
+            get { return spriteCut; }
+        }
+        SpriteCutter spriteCut;
+
         /// <summary>
         /// Gets the index of the current frame in the animation.
         /// </summary>
@@ -78,7 +84,7 @@ namespace SuperMarioWorldInXNA
             }
 
             // Calculate the source rectangle of the current frame.
-            Rectangle source = new Rectangle(FrameIndex * (Animation.Texture.Height / Animation.Columns), Animation.StartPos * 32, Animation.Texture.Width / Animation.Columns, Animation.Texture.Height / Animation.Rows);
+            Rectangle source = new Rectangle(FrameIndex * (Animation.Texture.Height / SpriteCut.Columns), Animation.StartPos * 32, Animation.Texture.Width / SpriteCut.Columns, Animation.Texture.Height / SpriteCut.Rows);
 
             // Draw the current frame.
             spriteBatch.Draw(Animation.Texture, position, source, Color.White, 0.0f, Origin, Animation.Scale, spriteEffects, 0.0f);
