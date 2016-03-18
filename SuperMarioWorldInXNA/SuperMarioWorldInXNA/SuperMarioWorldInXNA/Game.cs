@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System.Drawing;
+using System.IO;
 
 namespace SuperMarioWorldInXNA
 {
@@ -24,6 +25,7 @@ namespace SuperMarioWorldInXNA
         SpriteCutter spriteCut;
         Texture2D texture;
         Microsoft.Xna.Framework.Rectangle rect;
+        Level level;
         public Game()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -61,7 +63,14 @@ namespace SuperMarioWorldInXNA
             texture = Content.Load<Texture2D>("Sprites/Tiles/TileSheet");
             rect = spriteCut.getSubTile(1, texture);
 
+            //TESTINGG
+
+            string levelPath = "Content/Level/Level.png";
+            using (Stream fileStream = TitleContainer.OpenStream(levelPath))
+                level = new Level(Services, fileStream);
+
         }
+
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
@@ -100,8 +109,7 @@ namespace SuperMarioWorldInXNA
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise);
             player.Draw(gameTime, spriteBatch);
-            spriteBatch.Draw(texture, rect, Microsoft.Xna.Framework.Color.White, 0.0f, new Vector2(texture.Width, texture.Height), SpriteEffects.None, 2.0f);
-            spriteBatch.Draw(texture, pos, rect, Microsoft.Xna.Framework.Color.White, 0.0f, new Vector2(texture.Width, texture.Height), SpriteEffects.None, 2.0f)
+            level.Draw(gameTime, spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);

@@ -16,26 +16,18 @@ namespace SuperMarioWorldInXNA
 
     struct Tile
     {
-        public Texture2D Texture
-        {
-            get { return texture; }
-        }
-        Texture2D texture;
+        public Texture2D Texture;
+        public int blockID;
         public TileCollision Collision;
 
         public const int Width = 16;
         public const int Height = 16;
 
-        public Tile(Texture2D Texture, TileCollision Collision)
+        public Tile(Texture2D Texture, int blockID, TileCollision Collision)
         {
-            this.texture = Texture;
+            this.Texture = Texture;
             this.Collision = Collision;
-            //Changes
-        }
-        public Tile(Texture2D Texture, Rectangle subImg, TileCollision Collision)
-        {
-            this.texture = Texture;
-            this.Collision = Collision;
+            this.blockID = blockID;
             //Changes
         }
     }

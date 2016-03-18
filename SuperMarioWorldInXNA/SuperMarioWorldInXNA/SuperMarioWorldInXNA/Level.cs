@@ -1,12 +1,12 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Drawing;
 using SuperMarioWorldInXNA.StaticObjects;
 using System.ComponentModel;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework;
+using System.Drawing;
+using System.IO;
 
 namespace SuperMarioWorldInXNA
 {
@@ -16,14 +16,14 @@ namespace SuperMarioWorldInXNA
         {
             [Description("#FFFFFF")]
             Nothing,
-            [Description("#FF0000")]
-            Player,
+            [Description("#000000")]
+            PlayerStart = 2,
             [Description("#FF6A00")]
             MysteryBlockEmpty,
             [Description("#FFD800")]
             Coin,
             [Description("#00C200")]
-            Ground
+            GrassTop = 2,
         }
         public int Width
         {
@@ -41,17 +41,18 @@ namespace SuperMarioWorldInXNA
 
         private Tile[,] _level { get; set; }
         private Bitmap _levelBmp;
-        private Color _pixelColor;
+        private System.Drawing.Color _pixelColor;
         private string _pixelColorAsHex;
         private Enums _enums = new Enums();
 
         private List<Coin> _coins = new List<Coin>();
 
-        public Level(IServiceProvider services, string path)
+        private SpriteCutter spriteCut;
+
+        public Level(IServiceProvider services, Stream fileStream)
         {
             content = new ContentManager(services, "Content");
-
-            BuildLevel(path);
+            BuildLevel(fileStream);
         }
 
         /// <summary>
@@ -59,10 +60,10 @@ namespace SuperMarioWorldInXNA
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private void BuildLevel(string path)
+        private void BuildLevel(Stream fileStream)
         {
-            _levelBmp = new Bitmap(path);
-            Tile[,] _level = new Tile[_levelBmp.Width, _levelBmp.Height];
+            _levelBmp = new Bitmap(fileStream);
+         Tile[,] _level = new Tile[_levelBmp.Width, _levelBmp.Height];
             for (int y = 0; y < _levelBmp.Height; y++)
             {
                 for (int x = 0; x < _levelBmp.Width; x++)
@@ -77,63 +78,87 @@ namespace SuperMarioWorldInXNA
 
         }
 
-        private Tile LoadTile(Color pixelColor, int x, int y)
+        private Tile LoadTile(System.Drawing.Color pixelColor, int x, int y)
         {
             _pixelColor = _levelBmp.GetPixel(x, y);
             _pixelColorAsHex = ColorTranslator.ToHtml(_pixelColor);
 
             if (_pixelColorAsHex.Equals(_enums.GetEnumDescription(_objects.Nothing)))
             {
-                return new Tile(null, TileCollision.Passable);
+                return new Tile(null, 0, TileCollision.Passable);
             }
             else if (_pixelColorAsHex.Equals(_enums.GetEnumDescription(_objects.Coin)))
             {
                 Console.WriteLine("{0}, {1} is a Coin", x, y);
                 return LoadCoinTile(x, y);
             }
-            else if (_pixelColorAsHex.Equals(_enums.GetEnumDescription(_objects.MysteryBlockEmpty)))
+            /*else if (_pixelColorAsHex.Equals(_enums.GetEnumDescription(_objects.MysteryBlockEmpty)))
             {
                 Console.WriteLine("{0}, {1} is a EmptyMysteryBlock", x, y);
                 return LoadMysteryTile();
             }
-            else if (_pixelColorAsHex.Equals(_enums.GetEnumDescription(_objects.Player)))
+            else if (_pixelColorAsHex.Equals(_enums.GetEnumDescription(_objects.PlayerStart)))
             {
                 Console.WriteLine("{0}, {1} is a player tile", x, y);
                 return LoadPlayerTile();
+            }*/
+            else if (_pixelColorAsHex.Equals(_enums.GetEnumDescription(_objects.GrassTop)))
+            {
+                return LoadTile(TileCollision.Impassable);
             }
             else
             {
-                throw new NotSupportedException("This is not a valid block"); //moet error block worden
+                return new Tile(null, 0, TileCollision.Passable);
             }
         }
 
-        private Tile LoadMysteryTile()
+        /*private Tile LoadMysteryTile()
         {
-            throw new NotImplementedException();
+            
         }
 
         private Tile LoadPlayerTile()
         {
-            throw new NotImplementedException();
-        }
+            
+        }*/
 
         private Tile LoadTile(TileCollision tileCollision)
         {
-            return new Tile();
+            return new Tile(Content.Load<Texture2D>("Sprites/Tiles/TileSheet"), (int)_objects.GrassTop, TileCollision.Impassable);
         }
         private Tile LoadCoinTile(int x, int y)
         {
+            Microsoft.Xna.Framework.Point position = GetBounds(x, y).Center; //Namespace staat er voor omdat er comflictende usings zijn System.Drawing en de XNA
+            _coins.Add(new Coin(this, new Vector2(position.X, position.Y)));
             return new Tile();
+        }
+        public Microsoft.Xna.Framework.Rectangle GetBounds(int x, int y)//Namespace staat er voor omdat er comflictende usings zijn System.Drawing en de XNA
+        {
+            return new Microsoft.Xna.Framework.Rectangle(x * Tile.Width, y * Tile.Height, Tile.Width, Tile.Height);//Namespace staat er voor omdat er comflictende usings zijn System.Drawing en de XNA
         }
 
         public void Draw(Microsoft.Xna.Framework.GameTime gameTime, SpriteBatch spriteBatch)
         {
-
+            DrawTiles(spriteBatch);
         }
 
         private void DrawTiles(SpriteBatch spriteBatch)
         {
-             
+            for (int x = 0; x < _levelBmp.Width; x++)
+            {
+                for (int y = 0; y < _levelBmp.Height; y++)
+                {
+                    if(_level[x, y].Texture != null)
+                    {
+                        Texture2D texture = _level[x, y].Texture;
+                        if (texture != null)
+                        {
+                            Vector2 position = new Vector2(x, y) * (new Vector2(Tile.Width, Tile.Height));
+                            spriteBatch.Draw(texture, position, spriteCut.getSubTile(_level[x, y].blockID, texture), Microsoft.Xna.Framework.Color.White);
+                        }
+                    }
+                }
+            }
         }
 
     }
