@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,11 @@ namespace SuperMarioWorldInXNA
 
     struct Tile
     {
-        public Texture2D Texture;
+        public Texture2D Texture
+        {
+            get { return texture; }
+        }
+        Texture2D texture;
         public TileCollision Collision;
 
         public const int Width = 16;
@@ -23,7 +28,13 @@ namespace SuperMarioWorldInXNA
 
         public Tile(Texture2D Texture, TileCollision Collision)
         {
-            this.Texture = Texture;
+            this.texture = Texture;
+            this.Collision = Collision;
+            //Changes
+        }
+        public Tile(Texture2D Texture, Rectangle subImg, TileCollision Collision)
+        {
+            this.texture = Texture;
             this.Collision = Collision;
             //Changes
         }

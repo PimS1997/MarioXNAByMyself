@@ -6,6 +6,7 @@ using System.Text;
 using System.Drawing;
 using SuperMarioWorldInXNA.StaticObjects;
 using System.ComponentModel;
+using Microsoft.Xna.Framework.Content;
 
 namespace SuperMarioWorldInXNA
 {
@@ -20,18 +21,37 @@ namespace SuperMarioWorldInXNA
             [Description("#FF6A00")]
             MysteryBlockEmpty,
             [Description("#FFD800")]
-            Coin
+            Coin,
+            [Description("#00C200")]
+            Ground
         }
+        public int Width
+        {
+            get { return _level.GetLength(0); }
+        }
+        public int Height
+        {
+            get { return _level.GetLength(1); }
+        }
+        public ContentManager Content
+        {
+            get { return content; }
+        }
+        ContentManager content;
 
-        GameObject[,] _level { get; set; }
+        private Tile[,] _level { get; set; }
         private Bitmap _levelBmp;
         private Color _pixelColor;
         private string _pixelColorAsHex;
-        Enums enums = new Enums();
+        private Enums _enums = new Enums();
 
-        public Level(string path)
+        private List<Coin> _coins = new List<Coin>();
+
+        public Level(IServiceProvider services, string path)
         {
-            _level = BuildLevel(path);
+            content = new ContentManager(services, "Content");
+
+            BuildLevel(path);
         }
 
         /// <summary>
@@ -39,44 +59,82 @@ namespace SuperMarioWorldInXNA
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private GameObject[,] BuildLevel(string path)
+        private void BuildLevel(string path)
         {
             _levelBmp = new Bitmap(path);
-            GameObject[,] _level = new GameObject[_levelBmp.Width, _levelBmp.Height];
+            Tile[,] _level = new Tile[_levelBmp.Width, _levelBmp.Height];
             for (int y = 0; y < _levelBmp.Height; y++)
             {
                 for (int x = 0; x < _levelBmp.Width; x++)
                 {
                     _pixelColor = _levelBmp.GetPixel(x, y);
-                    _pixelColorAsHex = ColorTranslator.ToHtml(_pixelColor);
-
-                    if (_pixelColorAsHex.Equals(enums.GetEnumDescription(_objects.Nothing)))
-                    {
-                        _level[x, y] = null;
-                    }
-                    else if (_pixelColorAsHex.Equals(enums.GetEnumDescription(_objects.Coin)))
-                    {
-                        Console.WriteLine("{0}, {1} is a Coin", x, y);
-                        _level[x, y] = new Coin();
-                    }
-                    else if (_pixelColorAsHex.Equals(enums.GetEnumDescription(_objects.MysteryBlockEmpty)))
-                    {
-                        Console.WriteLine("{0}, {1} is a EmptyMysteryBlock", x, y);
-                        _level[x, y] = new MysteryBlock();
-                    }
-                    else if (_pixelColorAsHex.Equals(enums.GetEnumDescription(_objects.Player)))
-                    {
-                        Console.WriteLine("{0}, {1} is a player", x, y);
-                        //_level[x, y] = new Player();
-                    }
-                    else
-                    {
-                        _level[x, y] = null; //moet error block worden
-                    }
-
+                    _level[x, y] = LoadTile(_pixelColor, x, y);
                 }
             }
-            return _level;
         }
+        private void LoadTiles()
+        {
+
+        }
+
+        private Tile LoadTile(Color pixelColor, int x, int y)
+        {
+            _pixelColor = _levelBmp.GetPixel(x, y);
+            _pixelColorAsHex = ColorTranslator.ToHtml(_pixelColor);
+
+            if (_pixelColorAsHex.Equals(_enums.GetEnumDescription(_objects.Nothing)))
+            {
+                return new Tile(null, TileCollision.Passable);
+            }
+            else if (_pixelColorAsHex.Equals(_enums.GetEnumDescription(_objects.Coin)))
+            {
+                Console.WriteLine("{0}, {1} is a Coin", x, y);
+                return LoadCoinTile(x, y);
+            }
+            else if (_pixelColorAsHex.Equals(_enums.GetEnumDescription(_objects.MysteryBlockEmpty)))
+            {
+                Console.WriteLine("{0}, {1} is a EmptyMysteryBlock", x, y);
+                return LoadMysteryTile();
+            }
+            else if (_pixelColorAsHex.Equals(_enums.GetEnumDescription(_objects.Player)))
+            {
+                Console.WriteLine("{0}, {1} is a player tile", x, y);
+                return LoadPlayerTile();
+            }
+            else
+            {
+                throw new NotSupportedException("This is not a valid block"); //moet error block worden
+            }
+        }
+
+        private Tile LoadMysteryTile()
+        {
+            throw new NotImplementedException();
+        }
+
+        private Tile LoadPlayerTile()
+        {
+            throw new NotImplementedException();
+        }
+
+        private Tile LoadTile(TileCollision tileCollision)
+        {
+            return new Tile();
+        }
+        private Tile LoadCoinTile(int x, int y)
+        {
+            return new Tile();
+        }
+
+        public void Draw(Microsoft.Xna.Framework.GameTime gameTime, SpriteBatch spriteBatch)
+        {
+
+        }
+
+        private void DrawTiles(SpriteBatch spriteBatch)
+        {
+             
+        }
+
     }
 }

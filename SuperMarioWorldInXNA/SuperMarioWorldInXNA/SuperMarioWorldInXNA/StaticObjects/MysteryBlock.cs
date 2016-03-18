@@ -19,19 +19,6 @@ namespace SuperMarioWorldInXNA.StaticObjects
         Contain Contains;
         int ItemsLeft;
 
-        public override Texture2D texture
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         /// <summary>
         /// Creates an empty MysteryBlock
         /// </summary>

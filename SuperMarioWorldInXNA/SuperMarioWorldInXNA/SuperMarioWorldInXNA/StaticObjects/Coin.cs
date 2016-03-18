@@ -10,18 +10,6 @@ namespace SuperMarioWorldInXNA.StaticObjects
     {
         private bool isPickedUp { get; set; }
 
-        public override Texture2D texture
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         public Coin() : base()
         {

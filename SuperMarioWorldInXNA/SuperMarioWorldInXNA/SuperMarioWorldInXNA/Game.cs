@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using System.Drawing;
 
 namespace SuperMarioWorldInXNA
 {
@@ -20,6 +21,9 @@ namespace SuperMarioWorldInXNA
         SpriteBatch spriteBatch;
         Vector2 pos;
         Player player;
+        SpriteCutter spriteCut;
+        Texture2D texture;
+        Microsoft.Xna.Framework.Rectangle rect;
         public Game()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -52,6 +56,11 @@ namespace SuperMarioWorldInXNA
             pos.Y = GraphicsDevice.PresentationParameters.BackBufferHeight / 2;
             player = new Player(pos, Services);
             // TODO: use this.Content to load your game content here
+
+            spriteCut = new SpriteCutter();
+            texture = Content.Load<Texture2D>("Sprites/Tiles/TileSheet");
+            rect = spriteCut.getSubTile(1, texture);
+
         }
 
         /// <summary>
@@ -86,11 +95,13 @@ namespace SuperMarioWorldInXNA
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
             // TODO: Add your drawing code here
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise);
             player.Draw(gameTime, spriteBatch);
+            spriteBatch.Draw(texture, rect, Microsoft.Xna.Framework.Color.White, 0.0f, new Vector2(texture.Width, texture.Height), SpriteEffects.None, 2.0f);
+            spriteBatch.Draw(texture, pos, rect, Microsoft.Xna.Framework.Color.White, 0.0f, new Vector2(texture.Width, texture.Height), SpriteEffects.None, 2.0f)
             spriteBatch.End();
 
             base.Draw(gameTime);

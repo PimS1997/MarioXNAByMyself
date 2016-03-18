@@ -11,7 +11,17 @@ namespace SuperMarioWorldInXNA
             get { return texture; }
         }
         Texture2D texture;
+        public int Rows
+        {
+            get { return rows; }
+        }
+        int rows;
 
+        public int Columns
+        {
+            get { return columns; }
+        }
+        int columns;
         public SpriteCutter SpriteCut
         {
             get { return spriteCut; }
@@ -60,7 +70,7 @@ namespace SuperMarioWorldInXNA
         public int FrameWidth
         {
             // Assume square frames.
-            get { return Texture.Width / SpriteCut.Columns; }
+            get { return Texture.Width / columns; }
         }
 
         /// <summary>
@@ -68,7 +78,7 @@ namespace SuperMarioWorldInXNA
         /// </summary>
         public int FrameHeight
         {
-            get { return Texture.Height / SpriteCut.Rows; }
+            get { return Texture.Height / rows; }
         }
 
         /// <summary>
@@ -79,8 +89,8 @@ namespace SuperMarioWorldInXNA
             this.texture = texture;
             this.frameTime = frameTime;
             this.isLooping = isLooping;
-            SpriteCut.Rows = rows;
-            SpriteCut.Columns = columns;
+            this.rows = rows;
+            this.columns = columns;
             this.frameCount = frameCount;
             this.startPos = startPos;
             this.scale = scale;

@@ -9,6 +9,6 @@ namespace SuperMarioWorldInXNA
 {
     abstract class GameObject
     {
-        public abstract Texture2D texture { get; set; }
+        public Texture2D texture { get; set; }
     }
 }
