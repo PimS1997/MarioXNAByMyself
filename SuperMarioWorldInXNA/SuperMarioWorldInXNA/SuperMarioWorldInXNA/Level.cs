@@ -25,6 +25,24 @@ namespace SuperMarioWorldInXNA
             [Description("#00C200")]
             GrassTop = 2,
         }
+
+        public ContentManager Content
+        {
+            get { return content; }
+        }
+        ContentManager content;
+
+        private Tile[,] _level;
+        private Bitmap _levelBmp;
+        private System.Drawing.Color _pixelColor;
+        private string _pixelColorAsHex;
+        private Enums _enums = new Enums();
+
+        private int scale = 2;
+
+        private List<Coin> _coins = new List<Coin>();
+
+        private SpriteCutter spriteCut;
         public int Width
         {
             get { return _level.GetLength(0); }
@@ -33,26 +51,15 @@ namespace SuperMarioWorldInXNA
         {
             get { return _level.GetLength(1); }
         }
-        public ContentManager Content
-        {
-            get { return content; }
-        }
-        ContentManager content;
-
-        private Tile[,] _level { get; set; }
-        private Bitmap _levelBmp;
-        private System.Drawing.Color _pixelColor;
-        private string _pixelColorAsHex;
-        private Enums _enums = new Enums();
-
-        private List<Coin> _coins = new List<Coin>();
-
-        private SpriteCutter spriteCut;
 
         public Level(IServiceProvider services, Stream fileStream)
         {
             content = new ContentManager(services, "Content");
-            BuildLevel(fileStream);
+            spriteCut = new SpriteCutter();
+            _levelBmp = new Bitmap(fileStream);
+            _level = new Tile[_levelBmp.Width, _levelBmp.Height];
+
+            BuildLevel();
         }
 
         /// <summary>
@@ -60,10 +67,8 @@ namespace SuperMarioWorldInXNA
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private void BuildLevel(Stream fileStream)
+        private void BuildLevel()
         {
-            _levelBmp = new Bitmap(fileStream);
-         Tile[,] _level = new Tile[_levelBmp.Width, _levelBmp.Height];
             for (int y = 0; y < _levelBmp.Height; y++)
             {
                 for (int x = 0; x < _levelBmp.Width; x++)
@@ -153,8 +158,8 @@ namespace SuperMarioWorldInXNA
                         Texture2D texture = _level[x, y].Texture;
                         if (texture != null)
                         {
-                            Vector2 position = new Vector2(x, y) * (new Vector2(Tile.Width, Tile.Height));
-                            spriteBatch.Draw(texture, position, spriteCut.getSubTile(_level[x, y].blockID, texture), Microsoft.Xna.Framework.Color.White);
+                            Vector2 position = new Vector2(x, y) * (new Vector2(Tile.Width * scale, Tile.Height * scale));
+                            spriteBatch.Draw(texture, position, spriteCut.getSubTile(_level[x, y].blockID, texture), Microsoft.Xna.Framework.Color.White, 0.0f, Vector2.Zero, (float)scale, SpriteEffects.None, 0.0f);
                         }
                     }
                 }
