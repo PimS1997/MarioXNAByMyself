@@ -56,7 +56,7 @@ namespace SuperMarioWorldInXNA
             spriteBatch = new SpriteBatch(GraphicsDevice);
             pos.X = GraphicsDevice.PresentationParameters.BackBufferWidth / 2;
             pos.Y = GraphicsDevice.PresentationParameters.BackBufferHeight / 2;
-            player = new Player(pos, Services);
+
             // TODO: use this.Content to load your game content here
 
             spriteCut = new SpriteCutter();
@@ -67,8 +67,11 @@ namespace SuperMarioWorldInXNA
 
             string levelPath = "Content/Level/Level.png";
             using (Stream fileStream = TitleContainer.OpenStream(levelPath))
+            {
                 level = new Level(Services, fileStream);
+            }
 
+            player = new Player(pos, Services, level);
         }
 
 

@@ -78,6 +78,7 @@
     <Compile Include="Entity\AnimationPlayer.cs" />
     <Compile Include="Entity\Player.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="RectangleExtensions.cs" />
     <Compile Include="SpriteCutter.cs" />
     <Compile Include="StaticObjects\MysteryBlock.cs" />
     <Compile Include="StaticObjects\Coin.cs" />

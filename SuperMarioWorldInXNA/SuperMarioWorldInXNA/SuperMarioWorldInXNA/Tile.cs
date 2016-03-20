@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SuperMarioWorldInXNA
 {
-    enum TileCollision
+    public enum TileCollision
     {
         Passable = 0,
         Impassable = 1,

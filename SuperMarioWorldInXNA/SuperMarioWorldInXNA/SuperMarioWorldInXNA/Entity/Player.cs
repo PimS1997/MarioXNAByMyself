@@ -49,6 +49,8 @@ namespace SuperMarioWorldInXNA
 
         private const float GroundDragFactor = 0.48f;
 
+        private float previousBottom;
+
         ContentManager content;
 
         public Level Level
@@ -76,9 +78,21 @@ namespace SuperMarioWorldInXNA
         }
         Vector2 position;
 
-        public Player(Vector2 position, IServiceProvider services)
+        private Rectangle localBounds;
+        public Rectangle BoundingRectangle
         {
-            //this.level = level;
+            get
+            {
+                int left = (int)Math.Round(Position.X - sprite.Origin.X) + localBounds.X;
+                int top = (int)Math.Round(Position.Y - sprite.Origin.Y) + localBounds.Y;
+
+                return new Rectangle(left, top, localBounds.Width, localBounds.Height);
+            }
+        }
+
+        public Player(Vector2 position, IServiceProvider services, Level level)
+        {
+            this.level = level;
 
             LoadContent(services);
 
@@ -93,6 +107,12 @@ namespace SuperMarioWorldInXNA
             idleAnimation = new Animation(content.Load<Texture2D>("Sprites/Mario/mario"), frameTime, true, spriteSheetWidth, spriteSheetHeight, 1, 0, scale);
             jumpAnimation = new Animation(content.Load<Texture2D>("Sprites/Mario/mario"), frameTime, true, spriteSheetWidth, spriteSheetHeight, 1, 1, scale);
 
+            int width = (int)(idleAnimation.FrameWidth * 0.4);
+            int left = (idleAnimation.FrameWidth - width) / 2;
+            int height = (int)(idleAnimation.FrameWidth * 0.8);
+            int top = idleAnimation.FrameHeight - height;
+            localBounds = new Rectangle(left, top, width, height);
+
             //jumpSound = Level.Content.Load<SoundEffect>("Sounds/PlayerJump");
         }
         public void Reset(Vector2 position)
@@ -105,26 +125,12 @@ namespace SuperMarioWorldInXNA
         }
         public void Update(GameTime gameTime, KeyboardState keyboardState)
         {
-            if (position.Y > startPos.Y)
-            {
-                position.Y = startPos.Y;
-                velocity.Y = 0.0f;
-                IsOnGround = true;
-            }
-            if (!IsOnGround)
-            {
-                velocity.Y += gravity;
-                position.Y += velocity.Y;
-            }
-            else
-            {
-                position.Y = startPos.Y;
-            }
-
             GetInput(keyboardState, gameTime);
-
-            //ApplyPhysics(gameTime);
-
+            ApplyPhysics(gameTime);
+            PlayAnimation();
+        }
+        private void PlayAnimation()
+        {
             if (Math.Abs(Velocity.X) != 0)
             {
                 sprite.PlayAnimation(runAnimation);
@@ -139,7 +145,6 @@ namespace SuperMarioWorldInXNA
                 sprite.PlayAnimation(jumpAnimation);
             }
         }
-
         public void GetInput(KeyboardState keyboardState, GameTime gameTime)
         {
             if (keyboardState.IsKeyDown(Keys.A))
@@ -181,23 +186,88 @@ namespace SuperMarioWorldInXNA
             }
             return velocity.Y;
         }
+        private void CheckCollision()
+        {
+            Rectangle bounds = BoundingRectangle;
+            int leftTile = (int)Math.Floor((float)bounds.Left / Tile.Width);
+            int rightTile = (int)Math.Ceiling((float)bounds.Right / Tile.Width) - 1;
+            int topTile = (int)Math.Floor((float)bounds.Top / Tile.Height);
+            int bottomTile = (int)Math.Ceiling((float)bounds.Bottom / Tile.Height) - 1;
+
+            IsOnGround = false;
+
+            for (int y = topTile; y <= bottomTile; ++y)
+            {
+                for (int x = leftTile; x < rightTile; ++x)
+                {
+                    //if the is collidable
+                    TileCollision collision = level.GetCollision(x, y);
+                    if(collision != TileCollision.Passable)
+                    {
+                        Rectangle tileBounds = level.GetBounds(x, y);
+                        Vector2 depth = RectangleExtensions.GetIntersectionDepth(bounds, tileBounds);
+                        if(depth != Vector2.Zero)
+                        {
+                            float absDepthX = Math.Abs(depth.X);
+                            float absDepthY = Math.Abs(depth.Y);
+
+                            if(absDepthY < absDepthX || collision == TileCollision.Platform)
+                            {
+                                if(previousBottom <= tileBounds.Top)
+                                {
+                                    IsOnGround = true;
+                                }
+
+                                if(collision == TileCollision.Impassable || IsOnGround)
+                                {
+                                    Position = new Vector2(Position.X, Position.Y + depth.Y);
+
+                                    bounds = BoundingRectangle;
+                                }
+                            }
+                            else if(collision == TileCollision.Impassable)
+                            {
+                                Position = new Vector2(Position.X + depth.X, Position.Y);
+
+                                bounds = BoundingRectangle;
+                            }
+                        }
+                    }
+                }
+            }
+
+            previousBottom = bounds.Bottom;
+        }
+
 
         public void ApplyPhysics(GameTime gameTime)
         {
-            float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
             Vector2 previousPosition = Position;
-            velocity.X += movement * MoveAcceleration * elapsed;
 
+            if (position.Y > startPos.Y)
+            {
+                position.Y = startPos.Y;
+                velocity.Y = 0.0f;
+                IsOnGround = true;
+            }
+            if (!IsOnGround)
+            {
+                velocity.Y += gravity;
+                position.Y += velocity.Y;
+            }
+            else
+            {
+                position.Y = startPos.Y;
+            }
 
-            //Prevents the player from walking faster than his max speed
-            velocity.X = MathHelper.Clamp(velocity.X, -MaxMoveSpeed, MaxMoveSpeed);
-            velocity.X *= GroundDragFactor;
+            CheckCollision();
 
-            Position += velocity * elapsed;
-            Position = new Vector2((float)Math.Round(Position.X), (float)Math.Round(Position.Y));
+            // If the collision stopped us from moving, reset the velocity to zero.
+            if (Position.X == previousPosition.X)
+                velocity.X = 0;
 
-
+            if (Position.Y == previousPosition.Y)
+                velocity.Y = 0;
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
